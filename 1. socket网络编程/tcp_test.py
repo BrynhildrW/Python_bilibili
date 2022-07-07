@@ -14,28 +14,24 @@ from http import client
 import socket
 
 # %% tcp client
-# def tcp_client():
-#     # create tcp socket
-#     tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def tcp_client():
+    # create tcp socket
+    tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#     # target address
-#     server_ip = input('Please enter ip address:')  # str
-#     server_port = int(input('Please enter port:'))  # int
-#     server_addr = (server_ip, server_port)
+    # target address
+    server_ip = input('Please enter ip address:')  # str
+    server_port = int(input('Please enter port:'))  # int
+    server_addr = (server_ip, server_port)
 
-#     # connect to server
-#     tcp_client_socket.connect(server_addr)
+    # connect to server
+    tcp_client_socket.connect(server_addr)
 
-#     # send data
-#     send_data = input('Please enter your message:')
-#     tcp_client_socket.send(send_data.encode('gbk'))
+    # send data
+    send_data = input('Please enter your message:')
+    tcp_client_socket.send(send_data.encode('gbk'))
 
-#     # close socket
-#     tcp_client_socket.close()
-
-
-# if __name__ == '__main__':
-#     tcp_client()
+    # close socket
+    tcp_client_socket.close()
 
 
 # %% tcp server
@@ -81,6 +77,8 @@ def tcp_server():
     # close server
     tcp_server_socket.close()
 
+
+# %%
 if __name__ == '__main__':
     tcp_server()
 
