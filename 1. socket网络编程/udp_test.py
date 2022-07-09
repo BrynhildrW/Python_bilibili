@@ -42,22 +42,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# %% tcp communication
-
-# create tcp socket
-
-
-# target address
-
-
-# connect to server
-
-
-# receive data from server
-
-
-# close socket
-
-if __name__ == '__main__':
-    main()
