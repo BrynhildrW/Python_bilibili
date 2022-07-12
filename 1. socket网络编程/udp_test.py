@@ -19,9 +19,11 @@ def send_label(udp):
     predict_label = int(input('Please enter predicted label:'))  # int
     udp.sendto(predict_label.encode('gbk'), (dest_ip, dest_port))  # or 'utf-8'
 
+
 def recv_label(udp):
     predict_label = udp.recvfrom(1024)  # ((ip,port), msg)
     print('%s:%s' % (str(predict_label[1]), str(predict_label[0].decode('gbk'))))
+
 
 def main():
     # create udp socket
@@ -39,6 +41,7 @@ def main():
 
     # close socket
     udp_socket.close()
+
 
 if __name__ == "__main__":
     main()

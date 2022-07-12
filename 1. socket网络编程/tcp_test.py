@@ -125,6 +125,7 @@ def send_file_2_client(client_socket, client_addr, recv_data):
         client_socket.send(file_content)
         print('Data has been sent! Please check.')
 
+
 def data_server():
     # create tcp socket
     tcp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
