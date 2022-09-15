@@ -178,7 +178,7 @@ SHOW TABLES
 ```SQL
 -- 创建数据表
 -- 常用约束：
--- auto_increment: 自动增长
+-- AUTO_INCREMENT: 自动增长
 -- not null: 不允许为空
 -- primary key: 主键
 -- default: 默认值
@@ -191,13 +191,33 @@ CREATE TABLE xxxx(id INT, name VARCHAR(30))
 ```SQL
 -- 以一个简单的病患信息数据库为例：
 CREATE TABLE patient(
-    id int unsigned PRIMARY KEY NOT NULL auto_increment,
+    id int unsigned PRIMARY KEY NOT NULL AUTO_INCREMENT,
     name varchar(30) NOT NULL,
     gender enum("male","female") NOT NULL DEFAULT "male",
-    age tinyint unsigned NOT NULL,
+    age tinyint(3) unsigned NOT NULL,
     feature_1 decimal(9,4) NOT NULL,
     feature_2 decimal(9,4) NOT NULL
 )
+```
+
+```SQL
+-- 查看创建的数据表信息
+SHOW CREATE TABLE xxxx
+
+-- 预计结果
++---------+---------------------------------------------+
+| Table   | Create Table                                |
++---------+---------------------------------------------+
+| patient | CREATE TABLE `patient` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(30) NOT NULL,
+  `gender` enum('male','female') NOT NULL DEFAULT 'male',
+  `age` tinyint unsigned NOT NULL,
+  `feature_1` decimal(9,4) NOT NULL,
+  `feature_2` decimal(9,4) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=gbk                    |
++---------+--------------------------------------------+
 ```
 
 ```SQL
@@ -222,16 +242,22 @@ DESC xxxx
 +-----------+-----------------------+------+-----+---------+----------------+
 ```
 
+```SQL
+-- 查看表中的全部数据
+SELECT * FROM xxxx
+SELECT * FROM patient
+```
+
 ### 2.3 修改表
 ```SQL
 -- 修改表：添加字段
 -- xxxx（表名），yy（列名），zz（类型），ww（约束）
 ALTER TABLE xxxx ADD yy zz
-ALTER TABLE patient ADD treatment_date datetime NOT NULL
+ALTER TABLE patient ADD treatment_date datetime
 ```
 
 ```SQL
--- 修改表：删除字段
+-- 修改表：删除字段（慎用）
 ALTER TABLE xxxx DROP yy
 ALTER TABLE patient DROP feature_2
 ```
@@ -240,14 +266,199 @@ ALTER TABLE patient DROP feature_2
 -- 修改表：修改字段且重命名
 -- xxxx（表名），yy_1（原列名），yy_2（新列名），zz（类型），ww（约束）
 ALTER TABLE xxxx CHANGE yy_1 yy_2 zz ww
-ALTER TABLE patient CHANGE feature_3 blood_pressure tinyint unsigned NOT NULL
+ALTER TABLE patient CHANGE feature_1 blood_pressure tinyint(3) unsigned
 ```
 
 ```SQL
 -- 修改表：修改字段，保留原名
 -- xxxx（表名），yy（列名），zz（类型），ww（约束）
 ALTER TABLE xxxx MODIFY yy zz ww
-ALTER TABLE patient MODIFY treatment_date date NOT NULL
+ALTER TABLE patient MODIFY treatment_date date
+```
+
+## 3 数据的增删改查（CURD）
+### 3.1 数据新增
+```SQL
+-- 插入新数据（全字段新增）
+-- xxxx（表名），args（各字段参数，按顺序排列）
+INSERT INTO xxxx VALUES(*args)
+
+-- 例如 patient 表
++----------------+-----------------------+------+-----+---------+----------------+
+| Field          | Type                  | Null | Key | Default | Extra          |
++----------------+-----------------------+------+-----+---------+----------------+
+| id             | int unsigned          | NO   | PRI | NULL    | auto_increment |
+| name           | varchar(30)           | NO   |     | NULL    |                |
+| gender         | enum('male','female') | NO   |     | male    |                |
+| age            | tinyint unsigned      | YES  |     | NULL    |                |
+| blood_pressure | tinyint unsigned      | YES  |     | NULL    |                |
+| treatment_date | date                  | YES  |     | NULL    |                |
++----------------+-----------------------+------+-----+---------+----------------+
+
+-- 关于主键位置的三种写法（结果一样）
+INSERT INTO patient VALUES(0, 'Brynhildr', 'male', 25, 127, '2022-09-13')
+INSERT INTO patient VALUES(NULL, 'Brynhildr', 'male', 25, 127, '2022-09-13')
+INSERT INTO patient VALUES(DEFAULT, 'Brynhildr', 'male', 25, 127, '2022-09-13')
+
+-- 对于 ENUM 枚举，可以通过数字（1-N）代替实际选项
+INSERT INTO patient VALUES(0, 'Brynhildr', 1, 25, 127, '2022-09-13')
+
+-- SELECT * FROM patient
++----+-----------+--------+-----+----------------+----------------+
+| id | name      | gender | age | blood_pressure | treatment_date |
++----+-----------+--------+-----+----------------+----------------+
+|  1 | Brynhildr | male   |  25 |            125 | 2022-09-13     |
++----+-----------+--------+-----+----------------+----------------+
+```
+
+```SQL
+-- 插入新数据（部分字段新增）
+INSERT INTO xxxx (yy_1,yy_2,...) VALUES(value_1, value_2,...)
+INSERT INTO patient (name, gender, age) VALUES('Valkury', 2, 24)
+
+-- SELECT * FROM patient
++----+-----------+--------+------+----------------+----------------+
+| id | name      | gender | age  | blood_pressure | treatment_date |
++----+-----------+--------+------+----------------+----------------+
+|  1 | Brynhildr | male   |   25 |            125 | 2022-09-13     |
+|  2 | Valkury   | female |   24 |           NULL | NULL           |
++----+-----------+--------+------+----------------+----------------+
+```
+
+```SQL
+-- 批量插入数据（部分字段新增）
+-- 类似的方法同样可用于全字段新增
+INSERT INTO patient (name, gender, age) VALUES('Odin', 1, 70),
+                                              ('Hera', 2, 65)
+
+-- SELECT * FROM patient
++----+-----------+--------+------+----------------+----------------+
+| id | name      | gender | age  | blood_pressure | treatment_date |
++----+-----------+--------+------+----------------+----------------+
+|  1 | Brynhildr | male   |   25 |            125 | 2022-09-13     |
+|  2 | Valkury   | female |   24 |           NULL | NULL           |
+|  3 | Odin      | male   |   70 |           NULL | NULL           |
+|  4 | Hera      | female |   65 |           NULL | NULL           |
++----+-----------+--------+------+----------------+----------------+
+```
+
+### 3.2 数据修改
+```SQL
+-- 修改整列数据字段
+-- xxxx（表名），yy_1,..（列名），values_1,...（值）
+UPDATE xxxx SET yy_1=value_1, yy_2=value_2,...
+
+-- 按索引条件修改个别数据字段
+UPDATE xxxx SET yy_1=value_1, yy_2=value_2,... WHERE condition
+UPDATE patient SET age=80 WHERE id=3
+
+-- WHERE 条件索引不止适用于 UPDATE，同样适用于 SELECT
+-- SELECT * FROM patient WHERE gender='male'
++----+-----------+--------+------+----------------+----------------+
+| id | name      | gender | age  | blood_pressure | treatment_date |
++----+-----------+--------+------+----------------+----------------+
+|  1 | Brynhildr | male   |   25 |            125 | 2022-09-13     |
+|  3 | Odin      | male   |   80 |           NULL | NULL           |
++----+-----------+--------+------+----------------+----------------+
+```
+
+### 3.3 数据查询
+```SQL
+-- 基本查询（全部字段信息）
+-- xxxx（表名）
+SELECT * FROM xxxx WHERE condition
+SELECT * FROM patient WHERE gender='male'
+
+-- 预计结果
++----+-----------+--------+------+----------------+----------------+
+| id | name      | gender | age  | blood_pressure | treatment_date |
++----+-----------+--------+------+----------------+----------------+
+|  1 | Brynhildr | male   |   25 |            125 | 2022-09-13     |
+|  3 | Odin      | male   |   80 |           NULL | NULL           |
++----+-----------+--------+------+----------------+----------------+
+```
+
+```SQL
+-- 查询指定列（部分字段）
+-- xxxx（表名），yy_1,...（列名），condition（条件）
+SELECT yy_1,yy_2,... FROM xxxx WHERE condition
+SELECT name,gender FROM patient WHERE id<3
+
+-- 预计结果
++-----------+--------+
+| name      | gender |
++-----------+--------+
+| Brynhildr | male   |
+| Valkury   | female |
++-----------+--------+
+```
+
+```SQL
+-- 查询的同时，为列指定暂用的别名
+-- xxxx（表名），yy_1,...（列名）
+-- 顺序可以自定义，允许不与表字段顺序一致
+SELECT yy_1 AS yy_new1, yy_2 AS yy_new2,... FROM xxxx
+SELECT gender AS 性别, name AS 姓名 FROM patient
+
+-- 预计结果
++--------+-----------+
+| 性别   | 姓名      |
++--------+-----------+
+| male   | Brynhildr |
+| female | Valkury   |
+| male   | Odin      |
+| female | Hera      |
++--------+-----------+
+```
+
+### 3.4 数据删除（慎用）
+```SQL
+-- 物理删除（全删，删库跑路）
+-- xxxx（表名）
+DELETE FROM xxxx
+
+-- 删除部分无用字段
+-- xxxx（表名），yy_1,...（列名）
+DELETE FROM xxxx WHERE condition
+```
+
+```SQL
+-- 逻辑删除，实际数据还在
+-- 用一个额外字段表示该数据是否继续使用
+-- xxxx（表名），is_delete 二元属性，默认为 0，即保留
+ALTER TABLE xxxx ADD is_delete bit DEFAULT 0
+ALTER TABLE patient ADD is_delete bit DEFAULT 0
+UPDATE patient SET is_delete=1 WHERE id=1
+
+-- 预计结果
++----+-----------+--------+------+----------------+----------------+----------------------+
+| id | name      | gender | age  | blood_pressure | treatment_date | is_delete            |
++----+-----------+--------+------+----------------+----------------+----------------------+
+|  1 | Brynhildr | male   |   25 |            125 | 2022-09-13     | 0x01                 |
+|  2 | Valkury   | female |   24 |           NULL | NULL           | 0x00                 |
+|  3 | Odin      | male   |   80 |           NULL | NULL           | 0x00                 |
+|  4 | Hera      | female |   65 |           NULL | NULL           | 0x00                 |
++----+-----------+--------+------+----------------+----------------+----------------------+
+```
+
+```SQL
+
+```
+
+```SQL
+
+```
+
+```SQL
+
+```
+
+```SQL
+
+```
+
+```SQL
+
 ```
 
 ```SQL
