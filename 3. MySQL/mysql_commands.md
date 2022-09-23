@@ -394,6 +394,19 @@ SELECT name,gender FROM patient WHERE id<3
 ```
 
 ```SQL
+-- 查询多个字段的同时，为表指定别名，有利于从多个表中调取数据
+-- xxxx（表名），yy_1,...（列名）
+SELECT x.yy_1, x.yy_2 from xxxx as x
+SELECT p.name, p.gender from patient as p
+```
+
+```SQL
+-- 查询可重复字段（或 ENUM 字段）时去重（不包含空值）
+SELECT DISTINCT yy from xxxx
+SELECT DISTINCT gender from patient
+```
+
+```SQL
 -- 查询的同时，为列指定暂用的别名
 -- xxxx（表名），yy_1,...（列名）
 -- 顺序可以自定义，允许不与表字段顺序一致
@@ -439,48 +452,4 @@ UPDATE patient SET is_delete=1 WHERE id=1
 |  3 | Odin      | male   |   80 |           NULL | NULL           | 0x00                 |
 |  4 | Hera      | female |   65 |           NULL | NULL           | 0x00                 |
 +----+-----------+--------+------+----------------+----------------+----------------------+
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
-```
-
-```SQL
-
 ```
