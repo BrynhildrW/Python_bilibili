@@ -527,7 +527,57 @@ print(x.any(axis=0).any())  # True means full
 ---
 
 ## 61-70
-### 61.
+### 61. 从数组中的给定值中找出最近的值
+```python
+x = np.random.uniform(0,1,10)
+target = 0.5
+nearest_target = x.flat[np.argmin(abs(x-target))]
+
+print(x)
+print(nearest_target)
+```
+
+### 62. 用 `iterator` 计算两个维度分别为 $\mathbb{R}^{1 \times 3}$、$\mathbb{R}^{3 \times 1}$ 的矩阵之和
+```python
+data_1 = np.random.randn(1,3)
+data_2 = np.random.randn(3,1)
+iterator = np.nditer([data_1, data_2, None])
+for x,y,z in iterator:
+    z[...] = x + y
+print(iterator.operands[2])
+```
+
+### 63. 创建一个具有 `name` 属性的数组类
+```python
+class NamedArray(np.ndarray):
+    def __new__(cls, array, name='no name'):
+        obj = np.asarray(array).view(cls)
+        obj.name = name
+        return obj
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.info = getattr(obj, 'name', 'no name')
+
+z = NamedArray(np.arange(10), 'range_10')
+print(z.name)
+```
+
+### 64. 通过外部索引，在一个给定的向量上为每个元素加 1
+```python
+x = np.ones(10)
+index = np.random.randint(0,len(x),20)
+x += np.bincount(index)
+print(x)
+```
+
+### 65. 根据索引列表 $\pmb{X}$ 和权重向量 $\pmb{Y}$，构建数组 $\pmb{F}$
+```python
+x = [1,2,3,4,5,6]
+y = [1,3,9,3,4,1]
+print(np.bincount(x, weights=y))
+```
+
+### 
 ```python
 
 ```
